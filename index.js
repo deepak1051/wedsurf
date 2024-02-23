@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import customerRoute from './routes/cutomer.js';
 import AppError from './utils/appError.js';
 import globalErrorHandling from './controllers/error.js';
+import path from 'path';
 
 dotenv.config({ path: './config.env' });
 const app = express();
@@ -45,9 +46,6 @@ mongoose
 
 app.use('/api/v1/customerRoute', customerRoute);
 
-app.get('/', (req, res) => {
-  res.send('Hello india');
-});
 // app.all('*', (req, res, next) => {
 //   next(new AppError(`Can't find ${req.url} on this server`, 401));
 // });
