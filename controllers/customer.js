@@ -4,6 +4,7 @@ import AppError from '../utils/appError.js';
 import sendEmail from '../utils/email.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 const customerSignup = catchAsync(async (req, res, next) => {
   const { email, password, name, confirmPassword } = req.body;
@@ -12,6 +13,13 @@ const customerSignup = catchAsync(async (req, res, next) => {
   if (!email || !password || !name || !confirmPassword) {
     return next(new AppError('Please Enter All field', 401));
   }
+
+  const user = await Customer.findOne({ email });
+
+  if (user) {
+    return next(new AppError('Email already exists', 401));
+  }
+
   const customerData = await Customer.create({
     email,
     password,
@@ -73,10 +81,17 @@ const cutomerLogin = catchAsync(async (req, res, next) => {
     return next(new AppError('Please enter email and password', 401));
   }
   const customerData = await Customer.findOne({ email }).select('+password');
+
   if (
     !customerData ||
     !customerData.correctPassword(password, customerData.password)
   ) {
+    return next(new AppError('email or password not match', 401));
+  }
+
+  const isValidPassword = await bcrypt.compare(password, customerData.password);
+
+  if (!isValidPassword) {
     return next(new AppError('email or password not match', 401));
   }
 
